@@ -1,4 +1,4 @@
-# riboseq_pipeline
+# Ribo-seq Pipeline
 
 This pipeline processes fastq files from **ribosome profiling** runs into BAM files aligned to the human genome. 
 - Step 1: `fastp` (read trimming and qc)
