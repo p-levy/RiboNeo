@@ -11,6 +11,7 @@ novel_bed <- args[1]
 pos_wig <- args[2]
 neg_wig <- args[3]
 total_orfs <- args[4]
+output_prefix <- args[5]
 
 all_orfs <- fread(args[4])
 non_annotated_orfs <- all_orfs[ all_orfs$ORF_type != "annotated", ]
@@ -38,4 +39,4 @@ all_new_orfs <- rbind(positive_orfs, negative_orfs)
 
 final_orf_data <- merge(non_annotated_orfs, all_new_orfs, by.x = c("ORF_ID", "chrom", "strand"), by.y = c("ORF", "chrom", "strand"))
 
-write.table(final_orf_data, "translating_ORFs.txt", sep = "\t", row.names=F, col.names=T, quote=F)
+write.table(final_orf_data, paste(output_prefix, "translating_ORFs.txt", sep = "_"), sep = "\t", row.names=F, col.names=T, quote=F)
