@@ -12,6 +12,11 @@ pos_wig <- args[2]
 neg_wig <- args[3]
 total_orfs <- args[4]
 output_prefix <- args[5]
+threads <- args[6]
+
+if (threads >= detectCores()){
+	stop(sprintf("Number of threads (%s) requested larger than available threads (%s). Stopping execution", threads, detectCores()))
+}
 
 all_orfs <- fread(args[4])
 non_annotated_orfs <- all_orfs[ all_orfs$ORF_type != "annotated", ]
@@ -25,7 +30,7 @@ wig_pos <- import.wig(pos_wig)
 positive_orfs <- novel[ novel$strand != "-",]
 negative_orfs <- novel[ novel$strand != "+",]
 
-cl <- makeCluster(detectCores())
+cl <- makeCluster(threads)
 invisible(clusterEvalQ(cl, c(library(GenomicRanges))))
 clusterExport(cl, c("score", "wig_neg", "wig_pos"), envir=environment())
 
