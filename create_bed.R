@@ -24,7 +24,7 @@ non_annotated_orfs <- non_annotated_orfs %>% separate(., coordinate, c("start", 
 annotated_orfs$Score <- rep(0, nrow(annotated_orfs))
 non_annotated_orfs$Score <- rep(0, nrow(non_annotated_orfs))
 
-annotated_orfs <- annotated_orfs[,c(4,8,9,1,11, 6)]
+annotated_orfs <- annotated_orfs[,c(8,11,12,1,13,9)]
 non_annotated_orfs <- non_annotated_orfs[,c(4,8,9,1,11, 6)]
 
 write.table(annotated_orfs, paste(output_prefix, "annotated_orfs.bed", sep = "_"), sep = "\t", row.names=F, col.names=F, quote=F)
