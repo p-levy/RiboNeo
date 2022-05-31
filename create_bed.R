@@ -5,13 +5,15 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 
 args = commandArgs(trailingOnly=TRUE)
-input_df <- args[1]
-output_prefix <- args[2]
+candidate <- args[1]
+longest <- args[2]
+output_prefix <- args[3]
 
-total_orfs <- fread(input_df)
+candidate_orfs <- fread(candidate)
+longest_orfs <- fread(candidate)
 
-annotated_orfs <- total_orfs[ total_orfs$ORF_type == "annotated",]
-non_annotated_orfs <- total_orfs[ total_orfs$ORF_type != "annotated",]
+annotated_orfs <- candidate_orfs[ candidate_orfs$ORF_type == "annotated",]
+non_annotated_orfs <- longest_orfs[ longest_orfs$ORF_type != "annotated",]
 
 annotated_orfs <- annotated_orfs %>% mutate(coordinate = strsplit(as.character(coordinate), ',')) %>% unnest(coordinate)
 non_annotated_orfs <- non_annotated_orfs %>% mutate(coordinate = strsplit(as.character(coordinate), ',')) %>% unnest(coordinate)
