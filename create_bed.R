@@ -10,7 +10,7 @@ longest <- args[2]
 output_prefix <- args[3]
 
 candidate_orfs <- fread(candidate)
-longest_orfs <- fread(candidate)
+longest_orfs <- fread(longest)
 
 annotated_orfs <- candidate_orfs[ candidate_orfs$ORF_type == "annotated",]
 non_annotated_orfs <- longest_orfs[ longest_orfs$ORF_type != "annotated",]
