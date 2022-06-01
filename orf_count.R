@@ -12,10 +12,11 @@ pos_wig <- args[2]
 neg_wig <- args[3]
 total_orfs <- args[4]
 output_prefix <- args[5]
-threads <- args[6]
+threads <- strtoi(args[6])
+max_threads <- detectCores()
 
-if (threads >= detectCores()){
-	stop(sprintf("Number of threads (%s) requested larger than available threads (%s). Stopping execution", threads, detectCores()))
+if (threads >= max_threads){
+	stop(sprintf("Number of threads (%s) requested larger than available threads (%s). Stopping execution", threads, max_threads))
 }
 
 all_orfs <- fread(args[4])
