@@ -20,14 +20,14 @@ arg4: number of cores to use for parallel loop
       ")
   quit()
 }
-
+ 
 input_df <- args[1]
 candidates <- args[2]
 output_prefix <- args[3]
 n.cores <- args[4]
 
 # Load input files as data tables
-total_orfs <- fread(input_df, nrows = 1000)
+total_orfs <- fread(input_df)
 candidates_tr <- fread(candidates) %>% select(1, c(8:10)) %>% rename("orfID" = "V1", "exon_start"="V9", "exon_end"="V10", "n_exon"="V8")
 # Merge with candidate ORF file to get coordinates of each ORF
 total_orfs <- total_orfs %>% inner_join(candidates_tr, by = "orfID")
