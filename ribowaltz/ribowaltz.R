@@ -9,9 +9,9 @@ How to use:
 arg1: patient name/code (should start with a letter, not a number)
 arg2: path to directory where bam files are
 arg3: path to ribowaltz annotation.rds
-args4: lower length filter
-args5: upper length filter
-args6: output dir
+arg4: lower length filter
+arg5: upper length filter
+arg6: output dir
 
       ")
   quit()
