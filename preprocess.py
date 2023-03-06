@@ -37,6 +37,23 @@ def get_args():
                         metavar='\b',
                         help='Path to tRNA bowtie2 index prefix',
                         default='refs/tRNA')
+    
+    parser.add_argument('-l',
+                        '--lowlen',
+                        metavar='\b',
+                        help='lower length filter RiboWaltz',
+                        default='28')
+    
+    parser.add_argument('-u',
+                        '--uplen',
+                        metavar='\b',
+                        help='upper length filter RiboWaltz',
+                        default='36')
+    
+    parser.add_argument('-r',
+                        '--rds',
+                        metavar='\b',
+                        help='Path to RiboWalzt annotation RDS')
 
     parser.add_argument('-s',
                         '--stari',
@@ -47,6 +64,11 @@ def get_args():
                         '--gtf',
                         metavar='\b',
                         help='Path to GTF file')
+    
+    parser.add_argument('-a',
+                        '--annotate',
+                        help='optionnal: runs riboWalz create_annotation(gtf)',
+                        action='store_true')
 
     parser.add_argument('-T',
                         '--threads',
@@ -70,8 +92,12 @@ def main():
     trna_i = args.trnai
     starindex = args.stari
     gtf = args.gtf
+    ribowaltz_annotate = args.annotate
+    lowlen = args.lowlen
+    uplen = args.uplen
+    annotRds = args.rds
 
-    # create output directory out and set as current wd
+    # create output directory out
     if not os.path.exists(f'{os.getcwd()}/{sample}_out'):
         os.mkdir(f'{os.getcwd()}/{sample}_out') # create dir
     outdir = f'{os.getcwd()}/{sample}_out' # create outdir variable
@@ -174,8 +200,21 @@ def main():
         if os.path.exists(f"{outdir}/{file}"):
             os.remove(f"{outdir}/{file}")
 
+    # RiboWaltz
+    if ribowaltz_annotate:
+        logger.info("****** Step 11 = RiboWaltz annotate ******")
+        cmd = f"Rscript ribowaltz/ribowaltz_annot.R {gtf} {outdir}"
+        exec_command(cmd)
+        logger.info("****** Step 12 = RiboWaltz ******")
+        cmd = f"Rscript ribowaltz/ribowaltz.R {sample} {outdir} {outdir}/annotation_ribowaltz.rds {lowlen} {uplen} {outdir}"
+    else:
+        logger.info("****** Step 11 = RiboWaltz ******")
+        cmd = f"Rscript ribowaltz/ribowaltz.R {sample} {outdir} {annotRds} {lowlen} {uplen} {outdir}"
+
+    exec_command(cmd)
+
     # THE END
-    logger.info(f"****** Pipeline completed! ---> {sample}.dedup.bam file generated correctly ******")
+    logger.info(f"****** Preprocessing and RiboWaltz steps completed! ******")
 
 
 # --------------------------------------------------
