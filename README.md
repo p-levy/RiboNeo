@@ -14,12 +14,13 @@ This pipeline processes fastq files from **RiboLACE seq** (Immagina Biotech) int
 - Step 8: `samtools index` (required for next step umi_tools dedup)
 - Step 9: `umi_tools dedup` (remove duplicate reads using UMIs)
 - Step 10: `samtools index` (index final bam file)
+- Step 11: `ribowaltz` (creates different qc plots of riboseq data)
 
 Main outputs:
 <br>
-`sample.dedup.bam` and `sample.dedup.bam.bai`
+`sample.dedup.bam`, `sample.dedup.bam.bai` and `ribowaltz` pdf files.
 
-Run: `./preprocess.py [-h] [-r] [-t] [-i] [-j] [-s] [-g] [-T] sample fastq`
+Run: `./preprocess.py [-h] [-i] [-j] [-l] [-u] [-r] [-s] [-g] [-a] [-T] sample fastq`
 
 ```
 positional arguments:
@@ -30,14 +31,15 @@ optional arguments:
   -h, --help         show this help message and exit
   -i, --rrnai    Path to rRNA bowtie2 index prefix (default: refs/rRNA)
   -j, --trnai    Path to tRNA bowtie2 index prefix (default: refs/tRNA)
+  -l, --lowlen   lower length filter RiboWaltz (default: 28)
+  -u, --uplen    upper length filter RiboWaltz (default: 36)
+  -r, --rds      Path to RiboWalzt annotation RDS (default: None)
   -s, --stari    Path to STAR index (default: None)
   -g, --gtf      Path to GTF file (default: None)
+  -a, --annotate     optionnal: runs riboWalz create_annotation(gtf) (default:
+                     False)
   -T, --threads  Number of threads to use (default: 4)
 ```
-
-
-## RiboWaltz
-
 
 ## RibORF
 
