@@ -203,13 +203,13 @@ def main():
     # RiboWaltz
     if ribowaltz_annotate:
         logger.info("****** Step 11 = RiboWaltz annotate ******")
-        cmd = f"Rscript ribowaltz/ribowaltz_annot.R {gtf} {outdir}"
+        cmd = f"Rscript /RiboNeo/ribowaltz/ribowaltz_annot.R {gtf} {outdir}"
         exec_command(cmd)
         logger.info("****** Step 12 = RiboWaltz ******")
-        cmd = f"Rscript ribowaltz/ribowaltz.R {sample} {outdir} {outdir}/annotation_ribowaltz.rds {lowlen} {uplen} {outdir}"
+        cmd = f"Rscript /RiboNeo/ribowaltz/ribowaltz.R {sample} {outdir} {outdir}/annotation_ribowaltz.rds {lowlen} {uplen} {outdir}"
     else:
         logger.info("****** Step 11 = RiboWaltz ******")
-        cmd = f"Rscript ribowaltz/ribowaltz.R {sample} {outdir} {annotRds} {lowlen} {uplen} {outdir}"
+        cmd = f"Rscript /RiboNeo/ribowaltz/ribowaltz.R {sample} {outdir} {annotRds} {lowlen} {uplen} {outdir}"
 
     exec_command(cmd)
 
