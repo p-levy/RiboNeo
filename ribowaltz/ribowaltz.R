@@ -33,7 +33,7 @@ annotation_dt <- readRDS(annotation)
 
 # Load reads
 ## We first define the "name_samples" character string vector as follow:
-name_of_bams <- c(patient)
+name_of_bams <- c(paste0("sample_", patient))
 names(name_of_bams) <- c("Aligned.toTranscriptome.out")
 
 ## Acquiring input files
@@ -59,12 +59,12 @@ reads_psite_list_filt = psite_info(reads_list_filt, psite_offset_filt)
 # Plots
 # Reads length distribution
 # Unfiltered
-length_dist_1 = rlength_distr(unfiltered_reads_list, sample = patient)
+length_dist_1 = rlength_distr(unfiltered_reads_list, sample = paste0("sample_", patient))
 pdf(file = paste0(output_dir, "/length_dist.pdf"))
 length_dist_1$plot
 dev.off()
 # length-filtered
-length_dist_2 = rlength_distr(reads_list_filt, sample = patient)
+length_dist_2 = rlength_distr(reads_list_filt, sample = paste0("sample_", patient))
 pdf(file = paste0(output_dir, "/length_dist_filt.pdf"))
 length_dist_2$plot
 dev.off()
@@ -74,7 +74,7 @@ dev.off()
 ends_heatmap = rends_heat(
   unfiltered_reads_list, 
   annotation_dt, 
-  sample = patient, 
+  sample = paste0("sample_", patient), 
   cl = 95, # specifying a confidence level for
 #'   restricting the plot to a sub-range of read lengths. The new range is
 #'   associated to the most abundant populations of reads accounting for the cl%
@@ -91,7 +91,7 @@ dev.off()
 ends_heatmap_filt = rends_heat(
   reads_list_filt, 
   annotation_dt, 
-  sample = patient, 
+  sample = paste0("sample_", patient), 
   cl = 100, # all read lengths plotted
   utr5l = 25, 
   cdsl = 40, 
@@ -103,7 +103,7 @@ dev.off()
 
 # P-sites per region
 # length-filtered
-psite_region_1 = region_psite(reads_psite_list_filt, annotation_dt, sample = patient)
+psite_region_1 = region_psite(reads_psite_list_filt, annotation_dt, sample = paste0("sample_", patient))
 pdf(file = paste0(output_dir, "/psite_region_filt.pdf"))
 psite_region_1$plot
 dev.off()
@@ -112,7 +112,7 @@ dev.off()
 # unfiltered
 frames_stratified = frame_psite_length(
   reads_psite_list, 
-  sample = patient,
+  sample = paste0("sample_", patient),
   region = "all", 
   cl = 95
 )
@@ -122,7 +122,7 @@ dev.off()
 # length-filtered
 frames_stratified_1 = frame_psite_length(
   reads_psite_list_filt, 
-  sample = patient,
+  sample = paste0("sample_", patient),
   region = "all", 
   cl = 100
 )
@@ -130,7 +130,7 @@ pdf(file = paste0(output_dir, "/frames_stratified_filt.pdf"))
 frames_stratified_1$plot
 dev.off()
 
-frames_1 = frame_psite(reads_psite_list_filt, sample = patient, region = "all")
+frames_1 = frame_psite(reads_psite_list_filt, sample = paste0("sample_", patient), region = "all")
 pdf(file = paste0(output_dir, "/frame_psite_filt.pdf"))
 frames_1[["plot"]]
 dev.off()
@@ -140,7 +140,7 @@ dev.off()
 metaprofile = metaprofile_psite(
   reads_psite_list_filt, 
   annotation_dt, 
-  sample = patient,
+  sample = paste0("sample_", patient),
   utr5l = 20,
   cdsl = 40,
   utr3l = 20,
