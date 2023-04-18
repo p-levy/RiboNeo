@@ -18,16 +18,17 @@ RibORF package: https://github.com/zhejilab/RibORF/
 import argparse
 import subprocess
 import os
+import shutil
 import logging
 import sys
-
+from pipeline.common import *
 
 # --------------------------------------------------
 def get_args():
     """Get command-line arguments"""
 
     parser = argparse.ArgumentParser(
-        description='Process ribo-seq fastq files',
+        description='RibORF analysis of translating ORFs',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('sample',
@@ -47,8 +48,7 @@ def get_args():
     parser.add_argument('-p',
                         '--genePred',
                         metavar='\b',
-                        help='Path to genePred annotation file',
-                        default='/ref/combined.gencode.v39.mitranscriptome.unique_id.v2.unannotated.sorted.genePred')
+                        help='Path to genePred annotation file')
 
     parser.add_argument('-t',
                         '--transcriptGenePred',
@@ -60,15 +60,25 @@ def get_args():
                         '--readlength',
                         metavar='\b',
                         help='read lengths to consider for readDist step',
-                        default='28,29,30,31,32,33,34,35,36')
-
+                        default='32,33,34,35,36')
+    
+    parser.add_argument('-o',
+                        '--offset',
+                        metavar='\b',
+                        help='optionnal: provide to create custom offset.correction.parameters.txt',
+                        default='13,13,13,13,13')
+    
+    parser.add_argument('-c',
+                        '--candidates',
+                        metavar='\b',
+                        help='path to candidateORF.genepred.txt')
 
     parser.add_argument('-T',
                         '--threads',
                         help='Number of threads to use',
                         metavar='\b', # metavar \b to not show any metavar except the short and long flag
                         type=int,
-                        default=30)
+                        default=4)
 
     parser.add_argument('-a',
                         '--annotate',
@@ -76,26 +86,6 @@ def get_args():
                         action='store_true')
 
     return parser.parse_args()
-
-
-# --------------------------------------------------
-# def exec_command(cmd):
-#     """Execute commands in shell and logs it"""
-#     logger = logging.getLogger()
-#     logger.info(cmd)
-#     subprocess.run(cmd, shell=True, executable='/bin/bash')
-
-def exec_command(cmd):
-    logger = logging.getLogger()
-    logger.info(cmd)
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, executable='/bin/bash')
-    output, error = p.communicate()
-    if p.returncode != 0:
-        for line in output.decode("utf-8").split("\n") if output else "":
-            logger.error(line.rstrip())
-        for line in error.decode("utf-8").split("\n") if error else "":
-            logger.error(line.rstrip())
-        sys.exit()
 
 # --------------------------------------------------
 def main():
@@ -111,21 +101,20 @@ def main():
     readlength = args.readlength
     threads = args.threads
     orf_annotate = args.annotate
+    candidates = args.candidates
+    offset = args.offset
 
     # create output directory out and set as current wd
     if not os.path.exists(f'{os.getcwd()}/{sample}_out'):
         os.mkdir(f'{os.getcwd()}/{sample}_out') # create dir
     outdir = f'{os.getcwd()}/{sample}_out' # create outdir variable
-    print(outdir)
-    os.chdir(outdir) # set as new wd
 
-
-    # Create log file (called riboseq.log)
+    # Create log file (called riborf.log)
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         datefmt='%d-%b-%y %H:%M:%S',
                         level=logging.DEBUG,
                         handlers=[
-                        logging.FileHandler("riboseq.log"),
+                        logging.FileHandler("riborf.log"),
                         logging.StreamHandler() # these 2 handlers allow 1) to have the log file created and 2) to stream to the terminal
                         ])
 
@@ -134,48 +123,64 @@ def main():
     # ******************************************************************************************
 
     # Log start time
-    logger.info("(Re-)Start RibORF pipeline")
+    logger.info("Start RibORF pipeline")
 
     if orf_annotate:
     # ORFannotate.pl
-        logger.info("****** Step 1 = Generate Candidate ORFs ******")
-        cmd = f'perl /RibORF.1.0/ORFannotate.pl -g {genome} -t {genePred} -o {outdir}'
+        logger.info("****** Generate Candidate ORFs ******")
+        cmd = f'perl /RibORF.2.0/ORFannotate.pl -g {genome} -t {genePred} -o {outdir}'
         exec_command(cmd)
 
     # Convert STAR Bam file to Sam file, input for readDist script
-    logger.info("****** Step 2 = Convert STAR Bam file to Sam file, input for readDist script ******")
+    logger.info("****** Step 1 = Convert STAR Bam file to Sam file, input for readDist script ******")
     cmd = f"samtools view -h -o {outdir}/{sample}.dedup.sam {bam}"
     exec_command(cmd)
 
     # ReadDist.pl on Star output
-    logger.info("****** Step 3 = readDist.pl using protein coding genePred ******")
-    cmd = f"perl /RibORF.1.0/readDist.pl -f {outdir}/{sample}.dedup.sam -g {transcript} -o {outdir} -d {readlength}"
+    logger.info("****** Step 2 = readDist.pl using protein coding genePred ******")
+    cmd = f"perl /RibORF.2.0/readDist.pl -f {outdir}/{sample}.dedup.sam -g {transcript} -o {outdir} -d {readlength}"
     exec_command(cmd)
 
+    # Create offset.corretion.parameters.txt if different from default or copy it from pipeline dir if default
+    if offset:
+        offsetCorrectionFile = open(f"{outdir}/offset.corretion.parameters.txt", "w")
+        readlengths=readlength.split(",")
+        offsets=offset.split(",")
+        offsetCorrection=""
+        for rl,off in zip(readlengths,offsets):
+            offsetCorrection = offsetCorrection + rl + "\t" + off + "\n"
+        offsetCorrectionFile.write(offsetCorrection)
+        offsetCorrectionFile.close()
+    else:
+        shutil.copyfile("/RiboNeo/offset.corretion.parameters.txt", f"{outdir}/offset.corretion.parameters.txt")
 
-    #####################################################################
-    ## STOP HERE TO MAKE MANUALLY THE offset.correction.parameters.txt ##
-    #####################################################################
+    # offsetCorrect.pl: correct read locations based on offset distances between 5’ ends and ribosomal A-sites
+    logger.info("****** Step 3 = offsetCorrect.pl ******")
+    cmd = f"perl /RibORF.2.0/offsetCorrect.pl -r {outdir}/{sample}.dedup.sam -p {outdir}/offset.corretion.parameters.txt -o {outdir}/{sample}.offset_corrected.sam"
+    exec_command(cmd)
 
-    # # offsetCorrect.pl: correct read locations based on offset distances between 5’ ends and ribosomal A-sites
-    # logger.info("****** Step 4 = offsetCorrect.pl ******")
-    # cmd = f"perl /RibORF.1.0/offsetCorrect.pl -r {outdir}/{sample}.dedup.sam -p {outdir}/offset.corretion.parameters.txt -o {outdir}/{sample}.offset_corrected.sam"
-    # exec_command(cmd)
+    # readDist.pl on offset-corrected reads
+    logger.info("****** Step 4 = readDist.pl on offset-correctd reads ******")
+    cmd = f"perl /RibORF.2.0/readDist.pl -f {outdir}/{sample}.offset_corrected.sam -g {transcript} -o {outdir} -d 1"
+    exec_command(cmd)
 
-    # # readDist.pl on offset-corrected reads
-    # logger.info("****** Step 5 = readDist.pl on offset-correctd reads ******")
-    # cmd = f"perl /RibORF.1.0/readDist.pl -f {outdir}/{sample}.offset_corrected.sam -g {transcript} -o {outdir} -d 1"
-    # exec_command(cmd)
+    # ribORF.pl to identify translated ORFs
+    logger.info("****** Step 5 = ribORF.pl to identify translated ORFs ******")
+    if orf_annotate:
+        cmd = f"perl /RibORF.2.0/ribORF.pl -f {outdir}/{sample}.offset_corrected.sam -c {outdir}/candidateORF.genepred.txt -o {outdir}"
+    else:
+        cmd = f"perl /RibORF.2.0/ribORF.pl -f {outdir}/{sample}.offset_corrected.sam -c {candidates} -o {outdir}"
+    exec_command(cmd)
 
-    # # ribORF.pl to identify translated ORFs
-    # logger.info("****** Step 6 = ribORF.pl to identify translated ORFs ******")
-    # cmd = f"perl /RibORF.1.0/ribORF.pl -f {outdir}/{sample}.offset_corrected.sam -c /riboseq/riborf/annotate/3 -o {outdir}"
-    # exec_command(cmd)
+    logger.info("****** ribORF.pl done ******")
 
-    # logger.info("****** ribORF.pl done ******")
+    # Create offset-corrected bam file from sam file
+    logger.info("****** Step 6 = Create offset-corrected bam file from sam file and index ******")
+    cmd = f"samtools sort {outdir}/{sample}.offset_corrected.sam | samtools view -Sb -o {outdir}/{sample}.offset_corrected.bam \
+    && samtools index {outdir}/{sample}.offset_corrected.bam"
+    exec_command(cmd)
 
-
-    # logger.info("****** THE END ******")
+    logger.info("****** THE END ******")
 
 
 # --------------------------------------------------
