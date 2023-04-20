@@ -21,7 +21,7 @@ import argparse
 import os
 import shutil
 import logging
-import sys
+import re
 from pipeline.common import *
 
 # --------------------------------------------------
