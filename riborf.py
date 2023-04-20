@@ -169,7 +169,7 @@ def main():
         offsetCorrectionFile.write(offsetCorrection)
         offsetCorrectionFile.close()
     else:
-        shutil.copyfile("/RiboNeo/offset.corretion.parameters.txt", f"{outdir}/offset.corretion.parameters.txt")
+        shutil.copyfile("/RiboNeo/riborf/offset.corretion.parameters.txt", f"{outdir}/offset.corretion.parameters.txt")
 
     # offsetCorrect.pl: correct read locations based on offset distances between 5’ ends and ribosomal A-sites
     logger.info("****** Step 3 = offsetCorrect.pl ******")
