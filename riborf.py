@@ -158,9 +158,9 @@ def main():
     cmd = f"perl readDist.pl -f {outdir}/{sample}.dedup.sam -g {transcript} -o {outdir} -d {readlength}"
     exec_command(cmd)
 
-    # Create offset.corretion.parameters.txt if different from default or copy it from pipeline dir if default
+    # Create offset.correction.parameters.txt if different from default or copy it from pipeline dir if default
     if offset != "13,13,13,13,13":
-        offsetCorrectionFile = open(f"{outdir}/offset.corretion.parameters.txt", "w")
+        offsetCorrectionFile = open(f"{outdir}/offset.correction.parameters.txt", "w")
         readlengths=readlength.split(",")
         offsets=offset.split(",")
         offsetCorrection=""
@@ -169,11 +169,11 @@ def main():
         offsetCorrectionFile.write(offsetCorrection)
         offsetCorrectionFile.close()
     else:
-        shutil.copyfile("/RiboNeo/riborf/offset.corretion.parameters.txt", f"{outdir}/offset.corretion.parameters.txt")
+        shutil.copyfile("/RiboNeo/riborf/offset.correction.parameters.txt", f"{outdir}/offset.correction.parameters.txt")
 
     # offsetCorrect.pl: correct read locations based on offset distances between 5’ ends and ribosomal A-sites
     logger.info("****** Step 3 = offsetCorrect.pl ******")
-    cmd = f"perl offsetCorrect.pl -r {outdir}/{sample}.dedup.sam -p {outdir}/offset.corretion.parameters.txt -o {outdir}/{sample}.offset_corrected.sam"
+    cmd = f"perl offsetCorrect.pl -r {outdir}/{sample}.dedup.sam -p {outdir}/offset.correction.parameters.txt -o {outdir}/{sample}.offset_corrected.sam"
     exec_command(cmd)
 
     # readDist.pl on offset-corrected reads
