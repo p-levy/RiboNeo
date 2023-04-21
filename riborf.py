@@ -127,7 +127,7 @@ def main():
                         datefmt='%d-%b-%y %H:%M:%S',
                         level=logging.DEBUG,
                         handlers=[
-                        logging.FileHandler("riborf.log"),
+                        logging.FileHandler(f"{outdir}/riborf.log"),
                         logging.StreamHandler() # these 2 handlers allow 1) to have the log file created and 2) to stream to the terminal
                         ])
 
