@@ -1,1 +1,0 @@
-genePredToGtf file translating.candidateORF.genepred.txt translating.candidateORF.gtf
