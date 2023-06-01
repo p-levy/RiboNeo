@@ -2,7 +2,7 @@
 
 suppressPackageStartupMessages(library(rtracklayer))
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dplyr))
 
 args = commandArgs(trailingOnly=TRUE)
 
