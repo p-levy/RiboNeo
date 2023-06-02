@@ -29,7 +29,7 @@ cat $1 | cut -f 1 | grep -v orfID > $2/translating_ORF_ID.txt
 
 # Selected candidate ORFs only translating: candidate_orfs_translating.tsv
 # Using join command (need to sort the id file and table file first)
-LC_ALL=C join -t$'\t' <(LC_ALL=C sort -d $2/translating_ORF_ID.txt) <(LC_ALL=C sort -d -t$'\t' -k1,1 $3) > $2/translating.candidateORF.genepred.txt
+LC_ALL=C join -t$'\t' <(LC_ALL=C sort $2/translating_ORF_ID.txt) <(LC_ALL=C sort -t$'\t' -k1,1 $3) > $2/translating.candidateORF.genepred.txt
 
 ####### STEP 2: Generate candidate ORF fasta filtered for translating ORFs only ######################################################################
 
