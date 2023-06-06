@@ -77,7 +77,7 @@ def main():
         exit()
 
     csq = re.sub('\|', ' ', csq)
-    csq = re.sub(' translating.candidateORF.2.gff3.gz', ' GFF', csq)
+    csq = re.sub(' translating.candidateORF.vep.gff3.gz', ' GFF', csq)
     csq = re.sub("\'\}\)", '', csq)
 
     Record_INFO = namedtuple('INFO', csq)
@@ -260,8 +260,8 @@ def main():
                     variant.cdna_pos = record_INFO.cDNA_position
                     variant.cds_pos = record_INFO.CDS_position
                     variant.protein_pos = record_INFO.Protein_position
-                    # variant.aa = record_INFO.Amino_acids
-                    # variant.codon = record_INFO.Codons
+                    variant.aa = record_INFO.Amino_acids
+                    variant.codon = record_INFO.Codons
                     variants.append(variant)
 
     output = open(f'{outdir}/output_variants.tsv', "w")

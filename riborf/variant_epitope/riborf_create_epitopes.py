@@ -95,8 +95,8 @@ def main():
 
     for index, row in variant_table.iterrows(): # Iterrate by row to get compute epitopes (wt and mut)     
         ref = row["ref_alt"].split(">")[0]
-        cdna_pos = int(re.sub("-\d+", "", row["cdna_pos"])) #removes part after "-" for inframe indels
-        aa_pos = int(re.sub("-\d+", "", row["protein_pos"])) #removes part after "-" for inframe indels
+        cdna_pos = int(re.sub("-\d+", "", str(row["cdna_pos"]))) #removes part after "-" for inframe indels
+        aa_pos = int(re.sub("-\d+", "", str(row["protein_pos"]))) #removes part after "-" for inframe indels
         start_codon =int(row["startCodonPosition"])
         orfID = row["orfID"]
         fs = len(ref)-1 # -1 because the ref shows also the nucleotide that is still present in the alt allele
